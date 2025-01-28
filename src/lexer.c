@@ -27,6 +27,7 @@ size_t lex(char *txt, Token **tokbuf) {
         if (*txt == '\n') push_token(tokens, num_tok, (Token) {.ttype=NewLine});
         else if (*txt == ' ') {}
         else if (*txt == ':') push_token(tokens, num_tok, (Token) {.ttype=Colon});
+        else if (*txt == ',') push_token(tokens, num_tok, (Token) {.ttype=Comma});
         else if (*txt == '=') push_token(tokens, num_tok, (Token) {.ttype=Equ});
         else if (*txt == '+') push_token(tokens, num_tok, (Token) {.ttype=Add});
         else if (*txt == '-') push_token(tokens, num_tok, (Token) {.ttype=Sub});
@@ -60,7 +61,7 @@ size_t lex(char *txt, Token **tokbuf) {
             } else {
                 push_token(tokens, num_tok, ((Token) {.ttype=Identifier, .strval=buf}));
             }
-            txt += i;
+            txt += i - 1;
         } else if (*txt == '%') {
             txt++;
             size_t i = 0;

@@ -9,8 +9,15 @@ typedef struct {
     ASTBranch *val;
 } DefineAssignStatement;
 
+typedef struct {
+    char *name;
+    ASTBranch **args;
+    size_t num_args;
+} FunctionCallStatement;
+
 typedef enum {
     DefineAssign,
+    FunctionCall,
     None,
 } StatementType;
 
@@ -18,6 +25,7 @@ typedef struct {
     StatementType type;
     union {
         DefineAssignStatement define_assign;
+        FunctionCallStatement function_call;
     };
 } Statement;
 

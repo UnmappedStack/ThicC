@@ -4,7 +4,7 @@
 #include <statement.h>
 
 int main() {
-    char *test = "%var: uqword = $5 + !($3 * $4)\n";
+    char *test = "functionName($5 + !($3 * $4), 8)\n";
     Token *tokens;
     size_t num_tokens = lex(test, &tokens);
     parse_statement(tokens, num_tokens);
