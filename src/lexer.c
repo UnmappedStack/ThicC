@@ -15,20 +15,8 @@
         vec = realloc(vec, (size + 1) * sizeof(Token)); \
     } while (0)
 
-typedef enum {
-    Colon, Equ, Add, Sub, Div, Mul, LParen, RParen, LBracket, RBracket, LBrace, RBrace, 
-    UnsignedInt, SignedInt, Float, UQword, Identifier, Varname, NewLine,
-} TokenType;
-
-typedef struct {
-    TokenType ttype;
-    union {
-        uint64_t numval;
-        char    *strval;
-    };
-} Token;
-
-void lex(char *txt) {
+// Returns number of tokens. Puts into **tokbuf the pointer to a list of tokens lexed.
+size_t lex(char *txt, Token **tokbuf) {
     size_t len = strlen(txt);
     char *original = txt;
     txt = (char*) malloc(len);
@@ -50,6 +38,7 @@ void lex(char *txt) {
         else if (*txt == ']') push_token(tokens, num_tok, (Token) {.ttype=RBracket});
         else if (*txt == '{') push_token(tokens, num_tok, (Token) {.ttype=LBrace});
         else if (*txt == '}') push_token(tokens, num_tok, (Token) {.ttype=RBrace});
+        else if (*txt == '!') push_token(tokens, num_tok, (Token) {.ttype=Not});
         else if (*txt == '$') {
             size_t i = 0;
             for (; txt[i] >= '0' && txt[i] <= '9'; i++);
@@ -89,4 +78,6 @@ void lex(char *txt) {
         txt++;
     }
     printf("Lexing complete.\n");
+    *tokbuf = tokens;
+    return num_tok;
 }
