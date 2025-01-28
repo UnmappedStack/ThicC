@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <lexer.h>
 #include <expression.h>
+#include <statement.h>
 
 int main() {
-    char *test = "$5 + ($3 * $4)\n";
+    char *test = "%var: uqword = $5 + !($3 * $4)\n";
     Token *tokens;
     size_t num_tokens = lex(test, &tokens);
-    ASTBranch *ast = parse_expression(tokens, num_tokens);
-    printf("Parsing complete, AST:\n");
-    print_ast(ast, 0);
+    parse_statement(tokens, num_tokens);
 }

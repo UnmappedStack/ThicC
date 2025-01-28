@@ -10,14 +10,18 @@ uint16_t priority_map[][2] = {
     {Add, 6},
 };
 
-static char *ttype_as_str(TokenType tok) {
+char *ttype_as_str(TokenType tok) {
     if (tok == Mul) return "Mul";
     else if (tok == Div) return "Div";
     else if (tok == Add) return "Add";
     else if (tok == Sub) return "Sub";
+    else if (tok == Not) return "Not";
     else if (tok == LParen) return "LParen";
     else if (tok == RParen) return "RParen";
     else if (tok == UnsignedInt) return "Unsigned Int";
+    else if (tok == Identifier) return "Identifier";
+    else if (tok == Colon) return "Colon";
+    else if (tok == Varname) return "Variable Name";
     else return "Unmapped token type";
 }
 

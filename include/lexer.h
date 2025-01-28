@@ -16,6 +16,7 @@ typedef struct {
 } Token;
 
 size_t lex(char *txt, Token **tokbuf);
+char *ttype_as_str(TokenType tok);
 
 #define is_literal(tok) (tok == SignedInt || tok == UnsignedInt || tok == Float)
 #define is_operation(tok) (tok == Add || tok == Sub || tok == Div || tok == Mul)

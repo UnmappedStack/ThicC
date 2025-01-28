@@ -60,7 +60,7 @@ size_t lex(char *txt, Token **tokbuf) {
             } else {
                 push_token(tokens, num_tok, ((Token) {.ttype=Identifier, .strval=buf}));
             }
-            txt += i + 1;
+            txt += i;
         } else if (*txt == '%') {
             txt++;
             size_t i = 0;
@@ -69,7 +69,7 @@ size_t lex(char *txt, Token **tokbuf) {
             memcpy(buf, txt, i);
             buf[i] = 0;
             push_token(tokens, num_tok, ((Token) {.ttype=Varname, .strval=buf}));
-            txt += i;
+            txt += i - 1;
         }
         else {
             printf("Unknown token!\n");
