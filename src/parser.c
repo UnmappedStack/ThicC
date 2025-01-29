@@ -40,7 +40,7 @@ static size_t parse_function_sig(Token *tokens, FunctionSignature *sigbuf) {
         .name = tokens[0].strval,
         .args = args,
         .num_args = num_args,
-        .ret = tokens[num_args].ttype,
+        .ret = tokens[skip].ttype,
     };
     return skip + 1;
 }
