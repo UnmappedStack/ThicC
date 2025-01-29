@@ -4,9 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <stdbool.h>
 
-#define is_keyword_char(ch, is_first) (ch == '_' || isalpha(ch) || (isdigit(ch) && is_first))
+#define is_keyword_char(ch, is_first) (ch == '_' || isalpha(ch) || (isdigit(ch) && !is_first))
 
 #define push_token(vec, size, val) \
     do { \
@@ -14,6 +13,13 @@
         size++; \
         vec = realloc(vec, (size + 1) * sizeof(Token)); \
     } while (0)
+
+bool is_type(TokenType tok) {
+    // TODO: More types. This looks stupid cos of the lack of types (yes I know) but it'll be less dumb
+    // once there are more types
+    if (tok == UQword) return true;
+    else return false;
+}
 
 // Returns number of tokens. Puts into **tokbuf the pointer to a list of tokens lexed.
 size_t lex(char *txt, Token **tokbuf) {
@@ -78,7 +84,6 @@ size_t lex(char *txt, Token **tokbuf) {
         }
         txt++;
     }
-    printf("Lexing complete.\n");
     *tokbuf = tokens;
     return num_tok;
 }

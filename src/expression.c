@@ -15,13 +15,19 @@ char *ttype_as_str(TokenType tok) {
     else if (tok == Div) return "Div";
     else if (tok == Add) return "Add";
     else if (tok == Sub) return "Sub";
+    else if (tok == Equ) return "Equals";
+    else if (tok == LBrace) return "LBrace";
+    else if (tok == RBrace) return "RBrace";
     else if (tok == Not) return "Not";
+    else if (tok == Comma) return "Comma";
     else if (tok == LParen) return "LParen";
     else if (tok == RParen) return "RParen";
     else if (tok == UnsignedInt) return "Unsigned Int";
     else if (tok == Identifier) return "Identifier";
     else if (tok == Colon) return "Colon";
     else if (tok == Varname) return "Variable Name";
+    else if (tok == UQword) return "UQWord";
+    else if (tok == NewLine) return "New Line";
     else return "Unmapped token type";
 }
 

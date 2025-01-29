@@ -1,1 +1,3 @@
-functionName($5 + !($3 * $4), 8)
+functionName: (uqword %val1, uqword %val2) = uqword {
+    %var: uqword = $5 + !($3 * $4)
+}

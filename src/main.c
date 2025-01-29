@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <lexer.h>
-#include <expression.h>
-#include <statement.h>
+#include <parser.h>
 
 int main() {
+    Token *tokens;
+    FunctionSignature *functions;
     FILE *f = fopen("test.fat", "r");
     if (!f) {
         printf("Couldn't open test.fat!\n");
@@ -22,7 +23,8 @@ int main() {
         return 1;
     }
     fclose(f);
-    Token *tokens;
     size_t num_tokens = lex(file_contents, &tokens);
-    parse_statement(tokens, num_tokens);
+    printf("Lexing complete.\n");
+    size_t num_statements = parse_program(tokens, num_tokens, &functions);
+    printf("Parsing complete.\n");
 }
