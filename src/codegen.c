@@ -68,7 +68,7 @@ void codegen_ast(ASTBranch *ast) {
     else codegen_ast_branch(ast);
 }*/
 
-void codegen_ast_branch(ASTBranch *ast, size_t depth, char *final_reg, char type) {
+void codegen_ast(ASTBranch *ast, size_t depth, char *final_reg, char type) {
     if (ast->type == Number) {
         TABS(depth); printf("%%%s =%c copy %llu\n", final_reg, type, ast->number);
     } else if (ast->type == BinOp) {
@@ -77,8 +77,8 @@ void codegen_ast_branch(ASTBranch *ast, size_t depth, char *final_reg, char type
         size_t current = atoi(&final_reg[1]);
         sprintf(next, "s%llu", current + 1);
         sprintf(after_next, "s%llu", current + 2);
-        codegen_ast_branch(ast->binop.left_val, depth, next, type);
-        codegen_ast_branch(ast->binop.right_val, depth, after_next, type);
+        codegen_ast(ast->binop.left_val, depth, next, type);
+        codegen_ast(ast->binop.right_val, depth, after_next, type);
         if (ast->binop.op.ttype == Mul) {
             TABS(depth); printf("%%%s =%c mul %%%s, %%%s\n", final_reg, type, next, after_next);
         } else if (ast->binop.op.ttype == Add) {
@@ -91,7 +91,7 @@ void codegen_ast_branch(ASTBranch *ast, size_t depth, char *final_reg, char type
         char next[3];
         size_t current = atoi(&final_reg[1]);
         sprintf(next, "s%llu", current + 1);
-        codegen_ast_branch(ast->unaryop.val, depth, next, type);
+        codegen_ast(ast->unaryop.val, depth, next, type);
         if (ast->unaryop.op == Not) {
             TABS(depth); printf("%%%s =%c add %%%s, 0\n", final_reg, type, next);
         } else {
@@ -101,10 +101,6 @@ void codegen_ast_branch(ASTBranch *ast, size_t depth, char *final_reg, char type
         printf("Unknown AST node format.\n");
         exit(1);
     }
-}
-
-void codegen_ast(ASTBranch *ast, size_t depth, char *final_reg, char type) {
-    codegen_ast_branch(ast, depth, final_reg, type);
 }
 
 void codegen_defineassign(Statement statement, size_t depth) {
