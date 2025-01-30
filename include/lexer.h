@@ -5,7 +5,7 @@
 
 typedef enum {
     Colon, Equ, Add, Sub, Div, Mul, LParen, RParen, LBracket, RBracket, LBrace, RBrace, 
-    UnsignedInt, SignedInt, Float, UQword, Identifier, Varname, NewLine, Not, Comma,
+    UnsignedInt, SignedInt, Float, UQword, Identifier, Varname, NewLine, Not, Comma, Return, 
 } TokenType;
 
 typedef struct {

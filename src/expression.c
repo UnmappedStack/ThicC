@@ -28,6 +28,7 @@ char *ttype_as_str(TokenType tok) {
     else if (tok == Varname) return "Variable Name";
     else if (tok == UQword) return "UQWord";
     else if (tok == NewLine) return "New Line";
+    else if (tok == Return) return "Return";
     else return "Unmapped token type";
 }
 

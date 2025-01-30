@@ -64,6 +64,9 @@ size_t lex(char *txt, Token **tokbuf) {
             if (!strcmp(buf, "uqword")) {
                 free(buf);
                 push_token(tokens, num_tok, ((Token) {.ttype=UQword}));
+            } else if (!strcmp(buf, "return")) {
+                free(buf);
+                push_token(tokens, num_tok, ((Token) {.ttype=Return}));
             } else {
                 push_token(tokens, num_tok, ((Token) {.ttype=Identifier, .strval=buf}));
             }

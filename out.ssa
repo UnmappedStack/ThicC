@@ -7,5 +7,6 @@ export function l $main(env %e, l %r0, l %r1) {
 	%s6 =l mul %s7, %s8
 	%s5 =l add %s6, 0
 	%r3 =l add %s4, %s5
-	ret 0
+	%retval =l copy %r3
+	ret %retval
 }

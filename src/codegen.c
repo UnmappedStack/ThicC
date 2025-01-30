@@ -90,9 +90,19 @@ void codegen_defineassign(Statement statement, size_t depth) {
     codegen_ast(statement.define_assign.val, depth, buf, type);
 }
 
-void codegen_statements(Statement *statements, size_t num_statements, size_t depth) {
+void codegen_return(Statement statement, size_t depth, TokenType type) {
+    codegen_ast(statement.ret.val, depth, "retval", convert_type(type));
+    TABS(depth); fprintf(f, "ret %retval\n");
+}
+
+// returns 1 if last statement was `ret`, otherwise 0
+int codegen_statements(Statement *statements, size_t num_statements, size_t depth, TokenType ret_type) {
     for (size_t i = 0; i < num_statements; i++) {
         if (statements[i].type == DefineAssign) codegen_defineassign(statements[i], depth);
+        else if (statements[i].type == Ret) {
+            codegen_return(statements[i], depth, ret_type);
+            if (i == num_statements - 1) return 1;
+        }
         else {
             printf("Invalid statement type.\n");
             exit(1);
@@ -118,8 +128,11 @@ void generate_qbe(FunctionSignature *functab, size_t num_functions, int outfd) {
             if (arg + 1 != functab[i].num_args) fprintf(f, ", ");
         }
         fprintf(f, ") {\n@start\n");
-        codegen_statements(functab[i].statements, functab[i].num_statements, 1);
-        fprintf(f, "\tret 0\n}\n");
+        int ret_done = codegen_statements(functab[i].statements, functab[i].num_statements, 1, functab[i].ret);
+        if (ret_done)
+            fprintf(f, "}\n");
+        else
+            fprintf(f, "\tret 0\n}\n");
     }
     fclose(f);
 }

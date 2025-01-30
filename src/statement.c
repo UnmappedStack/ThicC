@@ -47,6 +47,15 @@ static size_t parse_expression_list(Token *tokens, size_t num_tokens, ASTBranch 
     return num_args;
 }
 
+static Statement parse_return_statement(Token *tokens, size_t num_tokens) {
+    return (Statement) {
+        .type = Ret,
+        .ret = (ReturnStatement) {
+            .val = parse_expression(&tokens[1], num_tokens - 1),
+        },
+    };
+}
+
 static Statement parse_function_call_statement(Token *tokens, size_t num_tokens) {
     ASTBranch **args;
     size_t num_args = parse_expression_list(tokens, num_tokens, &args);
@@ -66,6 +75,8 @@ Statement parse_statement(Token *tokens, size_t num_tokens) {
         return parse_define_assign_statement(tokens, num_tokens);
     } else if (tokens[0].ttype == Identifier && tokens[1].ttype == LParen) {
         return parse_function_call_statement(tokens, num_tokens);
+    } else if (tokens[0].ttype == Return) {
+        return parse_return_statement(tokens, num_tokens);
     } else {
         printf("Unknown statement type (first token type is %s).\n", ttype_as_str(tokens[0].ttype));
         exit(1);
