@@ -55,7 +55,7 @@ static size_t parse_fn(Token *tokens, size_t num_tokens, Statement **statements_
             (*statements_buf)[num_statements] = (Statement) parse_statement(&tokens[start], end - start);
             num_statements++;
             *statements_buf = realloc(*statements_buf, (num_statements + 1) * sizeof(Statement));
-            start = end = i;
+            start = end = i + 1;
         }
         end++;
     }

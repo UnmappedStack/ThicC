@@ -133,10 +133,11 @@ ASTBranch *parse_expression(Token *tokens, size_t num_tokens) {
         }
     }
     bool tok0_is_literal = is_literal(tokens[0].ttype);
-    if (num_tokens == 1 && tok0_is_literal) {
+    if (num_tokens == 1 && (tok0_is_literal || tokens[0].ttype == Varname)) {
         if (tokens[0].ttype == UnsignedInt) return new_branch((ASTBranch) {.type=Number,.number = tokens[0].numval});
         if (tokens[0].ttype == SignedInt) return new_branch((ASTBranch) {.type=Number,.number = tokens[0].numval});
         if (tokens[0].ttype == Float) return new_branch((ASTBranch) {.type=Number,.number = tokens[0].numval});
+        if (tokens[0].ttype == Varname) return new_branch((ASTBranch) {.type=Var,.var = tokens[0].strval});
         else {
             printf("Immediate value not yet supported (expression parser)\n"); // TODO: Proper error handler
             exit(1);

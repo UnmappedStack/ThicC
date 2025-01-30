@@ -49,6 +49,8 @@ static char convert_type(TokenType tok) {
 void codegen_ast(ASTBranch *ast, size_t depth, char *final_reg, char type) {
     if (ast->type == Number) {
         TABS(depth); fprintf(f, "%%%s =%c copy %llu\n", final_reg, type, ast->number);
+    } else if (ast->type == Var) {
+        TABS(depth); fprintf(f, "%%%s =%c copy %%r%llu\n", final_reg, type, var_to_reg(ast->var));
     } else if (ast->type == BinOp) {
         char next[3];
         char after_next[3];

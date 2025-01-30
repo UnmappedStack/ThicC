@@ -1,3 +1,4 @@
 main: (uqword %val1, uqword %val2) = uqword {
-    %var: uqword = $5 + !($3 * $4)
+    %othervar: uqword = $5
+    %var: uqword = %othervar + !($3 * $4)
 }
