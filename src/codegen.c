@@ -6,13 +6,14 @@
 #define TABS(x) \
     do { \
         for (size_t tab = 0; tab < x; tab++) { \
-            printf("\t"); \
+            fprintf(f, "\t"); \
         } \
     } while (0)
 
 // Because when have global variables ever not been a great idea...
 VarRegPair *regmap_current_fn;
 size_t regmap_len;
+FILE *f;
 
 #define push_regmap(name, reg) \
     do { \
@@ -45,32 +46,9 @@ static char convert_type(TokenType tok) {
     exit(1);
 }
 
-/*void codegen_ast_branch(ASTBranch *ast) {
-    if (ast->type == Number) {
-        printf("%llu", ast->number);
-    } else if (ast->type == BinOp) {
-        if (ast->binop.op.ttype == Add) printf("add ");
-        else if (ast->binop.op.ttype == Mul) printf("mul ");
-        else printf("UNKNOWN_OP");
-        printf("("); codegen_ast_branch(ast->binop.left_val);
-        printf("), ("); codegen_ast_branch(ast->binop.right_val); printf(")");
-    } else if (ast->type == UnaryOp) {
-        if (ast->unaryop.op == Not) printf("ceql ");
-        else printf("UNKNOWN_OP");
-        printf("("); codegen_ast_branch(ast->unaryop.val); printf(")");
-    } else {
-        printf("UNKNOWN_OP");
-    }
-}
-
-void codegen_ast(ASTBranch *ast) {
-    if (ast->type == Number) printf("copy %llu", ast->number);
-    else codegen_ast_branch(ast);
-}*/
-
 void codegen_ast(ASTBranch *ast, size_t depth, char *final_reg, char type) {
     if (ast->type == Number) {
-        TABS(depth); printf("%%%s =%c copy %llu\n", final_reg, type, ast->number);
+        TABS(depth); fprintf(f, "%%%s =%c copy %llu\n", final_reg, type, ast->number);
     } else if (ast->type == BinOp) {
         char next[3];
         char after_next[3];
@@ -80,9 +58,9 @@ void codegen_ast(ASTBranch *ast, size_t depth, char *final_reg, char type) {
         codegen_ast(ast->binop.left_val, depth, next, type);
         codegen_ast(ast->binop.right_val, depth, after_next, type);
         if (ast->binop.op.ttype == Mul) {
-            TABS(depth); printf("%%%s =%c mul %%%s, %%%s\n", final_reg, type, next, after_next);
+            TABS(depth); fprintf(f, "%%%s =%c mul %%%s, %%%s\n", final_reg, type, next, after_next);
         } else if (ast->binop.op.ttype == Add) {
-            TABS(depth); printf("%%%s =%c add %%%s, %%%s\n", final_reg, type, next, after_next);
+            TABS(depth); fprintf(f, "%%%s =%c add %%%s, %%%s\n", final_reg, type, next, after_next);
         } else {
             printf("Unknown AST operation.\n");
             exit(1);
@@ -93,7 +71,7 @@ void codegen_ast(ASTBranch *ast, size_t depth, char *final_reg, char type) {
         sprintf(next, "s%llu", current + 1);
         codegen_ast(ast->unaryop.val, depth, next, type);
         if (ast->unaryop.op == Not) {
-            TABS(depth); printf("%%%s =%c add %%%s, 0\n", final_reg, type, next);
+            TABS(depth); fprintf(f, "%%%s =%c add %%%s, 0\n", final_reg, type, next);
         } else {
             printf("Unknown AST operation.\n");
         }
@@ -122,17 +100,24 @@ void codegen_statements(Statement *statements, size_t num_statements, size_t dep
 
 void generate_qbe(FunctionSignature *functab, size_t num_functions, int outfd) {
     printf("Number of functions: %llu\n", num_functions);
+    remove("out.ssa");
+    f = fopen("out.ssa", "a");
+    if (f == NULL) {
+        printf("Failed to open SSA file to write to.\n");
+        exit(1);
+    }
     for (size_t i = 0; i < num_functions; i++) {
         regmap_current_fn = (VarRegPair*) malloc(sizeof(VarRegPair));
         regmap_len = 0;
-        printf("export function %c $%s(env %%e, ", 
+        fprintf(f, "export function %c $%s(env %%e, ", 
                 convert_type(functab[i].ret), functab[i].name);
         for (size_t arg = 0; arg < functab[i].num_args; arg++) {
-            printf("%c %%r%llu", convert_type(functab[i].args[arg].type), var_to_reg(functab[i].args[arg].name));
-            if (arg + 1 != functab[i].num_args) printf(", ");
+            fprintf(f, "%c %%r%llu", convert_type(functab[i].args[arg].type), var_to_reg(functab[i].args[arg].name));
+            if (arg + 1 != functab[i].num_args) fprintf(f, ", ");
         }
-        printf(") {\n@start\n");
+        fprintf(f, ") {\n@start\n");
         codegen_statements(functab[i].statements, functab[i].num_statements, 1);
-        printf("\tret 0\n}\n");
+        fprintf(f, "\tret 0\n}\n");
     }
+    fclose(f);
 }

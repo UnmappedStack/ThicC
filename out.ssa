@@ -1,0 +1,10 @@
+export function l $main(env %e, l %r0, l %r1) {
+@start
+	%s3 =l copy 5
+	%s6 =l copy 3
+	%s7 =l copy 4
+	%s5 =l mul %s6, %s7
+	%s4 =l add %s5, 0
+	%r2 =l add %s3, %s4
+	ret 0
+}
