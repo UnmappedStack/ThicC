@@ -25,7 +25,7 @@ bool is_type(TokenType tok) {
 size_t lex(char *txt, Token **tokbuf) {
     size_t len = strlen(txt);
     char *original = txt;
-    txt = (char*) malloc(len);
+    txt = (char*) malloc(len + 1);
     memcpy(txt, original, len + 1);
     Token *tokens = (Token*) malloc(sizeof(Token));
     size_t num_tok = 0;
@@ -71,6 +71,14 @@ size_t lex(char *txt, Token **tokbuf) {
                 push_token(tokens, num_tok, ((Token) {.ttype=Identifier, .strval=buf}));
             }
             txt += i - 1;
+        } else if (*txt == '"') {
+            size_t i = 0;
+            for (; !(txt[i] == '"' && i); i++);
+            char *buf = (char*) malloc(i + 1);
+            memcpy(buf, txt, i);
+            buf[i] = 0;
+            push_token(tokens, num_tok, ((Token) {.ttype=StrLit, .strval=buf+1}));
+            txt += i;
         } else if (*txt == '%') {
             txt++;
             size_t i = 0;

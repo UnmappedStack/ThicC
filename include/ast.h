@@ -19,6 +19,7 @@ typedef enum {
     UnaryOp,
     Number,
     Var,
+    Str,
 } ASTBranchType;
 
 struct ASTBranch {
@@ -28,6 +29,7 @@ struct ASTBranch {
         UnaryNode unaryop;
         uint64_t number;
         char *var;
+        char *strlit;
     };
 }; 
 

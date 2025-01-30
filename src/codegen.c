@@ -13,6 +13,8 @@
 // Because when have global variables ever not been a great idea...
 VarRegPair *regmap_current_fn;
 size_t regmap_len;
+char **string_literals;
+size_t num_strlit;
 FILE *f;
 
 #define push_regmap(name, reg) \
@@ -51,6 +53,12 @@ void codegen_ast(ASTBranch *ast, size_t depth, char *final_reg, char type) {
         TABS(depth); fprintf(f, "%%%s =%c copy %llu\n", final_reg, type, ast->number);
     } else if (ast->type == Var) {
         TABS(depth); fprintf(f, "%%%s =%c copy %%r%llu\n", final_reg, type, var_to_reg(ast->var));
+    } else if (ast->type == Str) {
+        string_literals[num_strlit] = (char*) malloc(strlen(ast->strlit) + 1);
+        strcpy(string_literals[num_strlit], ast->strlit);
+        TABS(depth); fprintf(f, "%%%s =%c copy $strlit%llu\n", final_reg, type, num_strlit);
+        num_strlit++;
+        string_literals = realloc(string_literals, (num_strlit + 1) * sizeof(char*));
     } else if (ast->type == BinOp) {
         char next[3];
         char after_next[3];
@@ -113,11 +121,13 @@ int codegen_statements(Statement *statements, size_t num_statements, size_t dept
 void generate_qbe(FunctionSignature *functab, size_t num_functions, int outfd) {
     printf("Number of functions: %llu\n", num_functions);
     remove("out.ssa");
-    f = fopen("out.ssa", "a");
+    f = fopen("out.ssa", "a+");
     if (f == NULL) {
         printf("Failed to open SSA file to write to.\n");
         exit(1);
     }
+    num_strlit = 0;
+    string_literals = (char**) malloc(sizeof(char*));
     for (size_t i = 0; i < num_functions; i++) {
         regmap_current_fn = (VarRegPair*) malloc(sizeof(VarRegPair));
         regmap_len = 0;
@@ -134,5 +144,18 @@ void generate_qbe(FunctionSignature *functab, size_t num_functions, int outfd) {
         else
             fprintf(f, "\tret 0\n}\n");
     }
+    // This is a truly horrible, hacky, terrible solution. Ew and fuck this. (TODO)
+    fseek(f, 0L, SEEK_END);
+    size_t flen = ftell(f);
+    fseek(f, 0L, SEEK_SET);
+    char *current = (char*) malloc(flen + 1);
+    fread(current, flen, 1, f);
+    fclose(f);
+    remove("out.ssa");
+    f = fopen("out.ssa", "a");
+    for (size_t strlit = 0; strlit < num_strlit; strlit++) {
+        fprintf(f, "data $strlit%llu = { b \"%s\", b 0 }\n", strlit, string_literals[strlit]);
+    }
+    fprintf(f, "\n%s", current);
     fclose(f);
 }

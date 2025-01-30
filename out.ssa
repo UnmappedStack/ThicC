@@ -1,12 +1,15 @@
+data $strlit0 = { b "Hello, world!", b 0 }
+
 export function l $main(env %e, l %r0, l %r1) {
 @start
-	%r2 =l copy 5
-	%s4 =l copy %r2
-	%s7 =l copy 3
-	%s8 =l copy 4
-	%s6 =l mul %s7, %s8
-	%s5 =l add %s6, 0
-	%r3 =l add %s4, %s5
-	%retval =l copy %r3
+	%r2 =l copy $strlit0
+	%r3 =l copy 5
+	%s5 =l copy %r3
+	%s8 =l copy 3
+	%s9 =l copy 4
+	%s7 =l mul %s8, %s9
+	%s6 =l add %s7, 0
+	%r4 =l add %s5, %s6
+	%retval =l copy %r4
 	ret %retval
 }
