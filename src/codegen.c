@@ -45,29 +45,73 @@ static char convert_type(TokenType tok) {
     exit(1);
 }
 
-void codegen_ast(ASTBranch *ast) {
+/*void codegen_ast_branch(ASTBranch *ast) {
     if (ast->type == Number) {
-        printf("$%llu", ast->number);
+        printf("%llu", ast->number);
     } else if (ast->type == BinOp) {
         if (ast->binop.op.ttype == Add) printf("add ");
         else if (ast->binop.op.ttype == Mul) printf("mul ");
         else printf("UNKNOWN_OP");
-        printf("("); codegen_ast(ast->binop.left_val);
-        printf("), ("); codegen_ast(ast->binop.right_val); printf(")");
+        printf("("); codegen_ast_branch(ast->binop.left_val);
+        printf("), ("); codegen_ast_branch(ast->binop.right_val); printf(")");
     } else if (ast->type == UnaryOp) {
-        if (ast->unaryop.op == Not) printf("ceq ");
+        if (ast->unaryop.op == Not) printf("ceql ");
         else printf("UNKNOWN_OP");
-        printf("("); codegen_ast(ast->unaryop.val); printf(")");
+        printf("("); codegen_ast_branch(ast->unaryop.val); printf(")");
     } else {
         printf("UNKNOWN_OP");
     }
 }
 
+void codegen_ast(ASTBranch *ast) {
+    if (ast->type == Number) printf("copy %llu", ast->number);
+    else codegen_ast_branch(ast);
+}*/
+
+void codegen_ast_branch(ASTBranch *ast, size_t depth, char *final_reg, char type) {
+    if (ast->type == Number) {
+        TABS(depth); printf("%%%s =%c copy %llu\n", final_reg, type, ast->number);
+    } else if (ast->type == BinOp) {
+        char next[3];
+        char after_next[3];
+        size_t current = atoi(&final_reg[1]);
+        sprintf(next, "s%llu", current + 1);
+        sprintf(after_next, "s%llu", current + 2);
+        codegen_ast_branch(ast->binop.left_val, depth, next, type);
+        codegen_ast_branch(ast->binop.right_val, depth, after_next, type);
+        if (ast->binop.op.ttype == Mul) {
+            TABS(depth); printf("%%%s =%c mul %%%s, %%%s\n", final_reg, type, next, after_next);
+        } else if (ast->binop.op.ttype == Add) {
+            TABS(depth); printf("%%%s =%c add %%%s, %%%s\n", final_reg, type, next, after_next);
+        } else {
+            printf("Unknown AST operation.\n");
+            exit(1);
+        }
+    } else if (ast->type == UnaryOp) {
+        char next[3];
+        size_t current = atoi(&final_reg[1]);
+        sprintf(next, "s%llu", current + 1);
+        codegen_ast_branch(ast->unaryop.val, depth, next, type);
+        if (ast->unaryop.op == Not) {
+            TABS(depth); printf("%%%s =%c add %%%s, 0\n", final_reg, type, next);
+        } else {
+            printf("Unknown AST operation.\n");
+        }
+    } else {
+        printf("Unknown AST node format.\n");
+        exit(1);
+    }
+}
+
+void codegen_ast(ASTBranch *ast, size_t depth, char *final_reg, char type) {
+    codegen_ast_branch(ast, depth, final_reg, type);
+}
+
 void codegen_defineassign(Statement statement, size_t depth) {
     char type = (statement.define_assign.size == NewLine) ? 'l' : convert_type(statement.define_assign.size);
-    TABS(depth); printf("%%r%llu =%c ", var_to_reg(statement.define_assign.name), type);
-    codegen_ast(statement.define_assign.val);
-    printf("\n");
+    char buf[3];
+    sprintf(buf, "r%llu", var_to_reg(statement.define_assign.name));
+    codegen_ast(statement.define_assign.val, depth, buf, type);
 }
 
 void codegen_statements(Statement *statements, size_t num_statements, size_t depth) {
@@ -88,11 +132,11 @@ void generate_qbe(FunctionSignature *functab, size_t num_functions, int outfd) {
         printf("export function %c $%s(env %%e, ", 
                 convert_type(functab[i].ret), functab[i].name);
         for (size_t arg = 0; arg < functab[i].num_args; arg++) {
-            printf("%c %%%llu", convert_type(functab[i].args[arg].type), var_to_reg(functab[i].args[arg].name));
+            printf("%c %%r%llu", convert_type(functab[i].args[arg].type), var_to_reg(functab[i].args[arg].name));
             if (arg + 1 != functab[i].num_args) printf(", ");
         }
         printf(") {\n@start\n");
         codegen_statements(functab[i].statements, functab[i].num_statements, 1);
-        printf("}\n");
+        printf("\tret 0\n}\n");
     }
 }
