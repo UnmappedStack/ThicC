@@ -45,8 +45,29 @@ static char convert_type(TokenType tok) {
     exit(1);
 }
 
+void codegen_ast(ASTBranch *ast) {
+    if (ast->type == Number) {
+        printf("$%llu", ast->number);
+    } else if (ast->type == BinOp) {
+        if (ast->binop.op.ttype == Add) printf("add ");
+        else if (ast->binop.op.ttype == Mul) printf("mul ");
+        else printf("UNKNOWN_OP");
+        printf("("); codegen_ast(ast->binop.left_val);
+        printf("), ("); codegen_ast(ast->binop.right_val); printf(")");
+    } else if (ast->type == UnaryOp) {
+        if (ast->unaryop.op == Not) printf("ceq ");
+        else printf("UNKNOWN_OP");
+        printf("("); codegen_ast(ast->unaryop.val); printf(")");
+    } else {
+        printf("UNKNOWN_OP");
+    }
+}
+
 void codegen_defineassign(Statement statement, size_t depth) {
-    TABS(depth); printf("test reg conversion: %%%llu\n", var_to_reg("val2"));
+    char type = (statement.define_assign.size == NewLine) ? 'l' : convert_type(statement.define_assign.size);
+    TABS(depth); printf("%%r%llu =%c ", var_to_reg(statement.define_assign.name), type);
+    codegen_ast(statement.define_assign.val);
+    printf("\n");
 }
 
 void codegen_statements(Statement *statements, size_t num_statements, size_t depth) {
@@ -71,8 +92,7 @@ void generate_qbe(FunctionSignature *functab, size_t num_functions, int outfd) {
             if (arg + 1 != functab[i].num_args) printf(", ");
         }
         printf(") {\n@start\n");
-        
         codegen_statements(functab[i].statements, functab[i].num_statements, 1);
-        printf("\n}\n");
+        printf("}\n");
     }
 }
