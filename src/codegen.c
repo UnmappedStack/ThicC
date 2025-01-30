@@ -103,10 +103,24 @@ void codegen_return(Statement statement, size_t depth, TokenType type) {
     TABS(depth); fprintf(f, "ret %retval\n");
 }
 
+void codegen_functioncall(Statement statement, size_t depth) {
+    for (int64_t arg = statement.function_call.num_args - 1; arg >= 0; arg--) {
+        char buf[6];
+        snprintf(buf, 6, "a%llu", arg);
+        codegen_ast(statement.function_call.args[arg], depth, buf, 'l');
+    }
+    TABS(depth); fprintf(f, "call $%s(", statement.function_call.name);
+    for (int64_t arg = statement.function_call.num_args - 1; arg >= 0; arg--) {
+        fprintf(f, "l %%a%llu%s", arg, (arg == 0) ? "" : ", ");
+    }
+    fprintf(f, ")\n");
+}
+
 // returns 1 if last statement was `ret`, otherwise 0
 int codegen_statements(Statement *statements, size_t num_statements, size_t depth, TokenType ret_type) {
     for (size_t i = 0; i < num_statements; i++) {
         if (statements[i].type == DefineAssign) codegen_defineassign(statements[i], depth);
+        else if (statements[i].type == FunctionCall) codegen_functioncall(statements[i], depth);
         else if (statements[i].type == Ret) {
             codegen_return(statements[i], depth, ret_type);
             if (i == num_statements - 1) return 1;
@@ -153,6 +167,7 @@ void generate_qbe(FunctionSignature *functab, size_t num_functions, int outfd) {
     fclose(f);
     remove("out.ssa");
     f = fopen("out.ssa", "a");
+    fprintf(f, "# Generated from Thic code with ThicC. #\n");
     for (size_t strlit = 0; strlit < num_strlit; strlit++) {
         fprintf(f, "data $strlit%llu = { b \"%s\", b 0 }\n", strlit, string_literals[strlit]);
     }

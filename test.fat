@@ -1,6 +1,4 @@
-main: (uqword %val1, uqword %val2) = uqword {
-    %str: uqword = "Hello, world!"
-    %othervar: uqword = $5
-    %var: uqword = %othervar + !($3 * $4)
-    return %var
+main: (uqword %argc, uqword %argv) = uqword {
+    printf($5, "Hello, world from a program compiled with Thicc! Here's a number: %llu\n")
+    return $0
 }

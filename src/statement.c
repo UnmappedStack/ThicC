@@ -33,13 +33,14 @@ static size_t parse_expression_list(Token *tokens, size_t num_tokens, ASTBranch 
     size_t num_args = 0;
     size_t min_tok = 2;
     size_t max_tok = 2;
-    for (size_t i = 2; i < num_tokens - 2; i++) {
-        if (tokens[i].ttype == Comma || i == 0) {
+    for (size_t i = 2; i < num_tokens - 1; i++) {
+        if (tokens[i].ttype == Comma || i == 0 || i == num_tokens - 2) {
+            if (i == num_tokens - 2) max_tok++;
             ret[num_args] = parse_expression(&tokens[min_tok], max_tok - min_tok);
             ret = realloc(ret, sizeof(ret[0]) * (num_args + 1));
             num_args++;
-            min_tok = i;
-            max_tok = i;
+            min_tok = i + 1;
+            max_tok = i + 1;
         } else
             max_tok++;
     }

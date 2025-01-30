@@ -90,7 +90,7 @@ size_t lex(char *txt, Token **tokbuf) {
             txt += i - 1;
         }
         else {
-            printf("Unknown token!\n");
+            printf("Unknown token! Character = %c\n", *txt);
             exit(1);
         }
         txt++;
