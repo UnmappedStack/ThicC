@@ -18,3 +18,4 @@ typedef struct {
 } FunctionSignature;
 
 size_t parse_program(Token *tokens, size_t num_tokens, FunctionSignature **buf);
+size_t parse_fn(Token *tokens, size_t num_tokens, Statement **statements_buf);

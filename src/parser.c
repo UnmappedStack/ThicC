@@ -45,16 +45,19 @@ static size_t parse_function_sig(Token *tokens, FunctionSignature *sigbuf) {
     return skip + 1;
 }
 
-static size_t parse_fn(Token *tokens, size_t num_tokens, Statement **statements_buf) {
+size_t parse_fn(Token *tokens, size_t num_tokens, Statement **statements_buf) {
     *statements_buf = (Statement*) malloc(sizeof(Statement));
     size_t num_statements = 0;
     size_t start = 0;
     size_t end = 0;
     for (size_t i = 0; i < num_tokens; i++) {
         if (tokens[i].ttype == NewLine) {
-            (*statements_buf)[num_statements] = (Statement) parse_statement(&tokens[start], end - start);
+            size_t skip;
+            if (tokens[end].ttype != NewLine) end--;
+            (*statements_buf)[num_statements] = (Statement) parse_statement(&tokens[start], end - start, &skip);
             num_statements++;
             *statements_buf = realloc(*statements_buf, (num_statements + 1) * sizeof(Statement));
+            i += skip;
             start = end = i + 1;
         }
         end++;
@@ -74,6 +77,7 @@ size_t parse_program(Token *tokens, size_t num_tokens, FunctionSignature **buf) 
             i++;
             size_t len = 0;
             for (;; i++) {
+                if (tokens[i].ttype == LBrace && len) current_depth++;
                 if (tokens[i].ttype == RBrace) {
                     current_depth--;
                     if (!current_depth) break;

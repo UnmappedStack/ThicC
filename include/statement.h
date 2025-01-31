@@ -3,6 +3,8 @@
 #include <ast.h>
 #include <stddef.h>
 
+typedef struct Statement Statement;
+
 typedef struct {
     TokenType size; // Set to NewLine if it's just an assign statement
     char *name;
@@ -19,20 +21,27 @@ typedef struct {
     ASTBranch *val;
 } ReturnStatement;
 
+typedef struct {
+    Statement *statements;
+    size_t num_statements;
+} ScopeStatement;
+
 typedef enum {
     DefineAssign,
     FunctionCall,
     Ret,
+    Scope,
     None,
 } StatementType;
 
-typedef struct {
+struct Statement {
     StatementType type;
     union {
         DefineAssignStatement define_assign;
         FunctionCallStatement function_call;
         ReturnStatement       ret;
+        ScopeStatement        scope;
     };
-} Statement;
+};
 
-Statement parse_statement(Token *tokens, size_t num_tokens);
+Statement parse_statement(Token *tokens, size_t num_tokens, size_t *skip);

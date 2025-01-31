@@ -1,4 +1,8 @@
 main: (uqword %argc, uqword %argv) = uqword {
-    printf($5, "Hello, world from a program compiled with Thicc! Here's a number: %llu\n")
+    printf($5, "Before scope\n")
+    {
+        printf($5, "Hello, world from a program compiled with Thicc! Here's a number: %llu (within scope)\n")
+    }
+    printf($5, "After scope\n")
     return $0
 }

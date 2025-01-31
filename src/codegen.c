@@ -103,6 +103,13 @@ void codegen_return(Statement statement, size_t depth, TokenType type) {
     TABS(depth); fprintf(f, "ret %retval\n");
 }
 
+int codegen_statements(Statement *statements, size_t num_statements, size_t depth, TokenType ret_type);
+void codegen_scope(Statement statement, size_t depth, TokenType type) {
+    TABS(depth); fprintf(f, "# Begin scope {\n");
+    codegen_statements(statement.scope.statements, statement.scope.num_statements, depth + 1, type);
+    TABS(depth); fprintf(f, "# } End scope\n");
+}
+
 void codegen_functioncall(Statement statement, size_t depth) {
     for (int64_t arg = statement.function_call.num_args - 1; arg >= 0; arg--) {
         char buf[6];
@@ -121,6 +128,7 @@ int codegen_statements(Statement *statements, size_t num_statements, size_t dept
     for (size_t i = 0; i < num_statements; i++) {
         if (statements[i].type == DefineAssign) codegen_defineassign(statements[i], depth);
         else if (statements[i].type == FunctionCall) codegen_functioncall(statements[i], depth);
+        else if (statements[i].type == Scope) codegen_scope(statements[i], depth, ret_type);
         else if (statements[i].type == Ret) {
             codegen_return(statements[i], depth, ret_type);
             if (i == num_statements - 1) return 1;

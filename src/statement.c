@@ -1,4 +1,5 @@
 #include <statement.h>
+#include <parser.h>
 #include <expression.h>
 #include <stdio.h>
 #include <assert.h>
@@ -70,7 +71,31 @@ static Statement parse_function_call_statement(Token *tokens, size_t num_tokens)
     };
 }
 
-Statement parse_statement(Token *tokens, size_t num_tokens) {
+static Statement parse_scope_statement(Token *tokens, size_t num_tokens, size_t *skip) {
+    size_t len = 0;
+    size_t current_depth = 1;
+    for (;;) {
+        if (tokens[len].ttype == LBrace && len) current_depth++;
+        if (tokens[len].ttype == RBrace) {
+            current_depth--;
+            if (!current_depth) break;
+        }
+        len++;
+    }
+    Statement *statements;
+    size_t num_statements = parse_fn(&tokens[2], len - 1, &statements);
+    *skip = len;
+    return (Statement) {
+        .type = Scope,
+        .scope = (ScopeStatement) {
+            .statements = statements,
+            .num_statements = num_statements,
+        },
+    };
+}
+
+Statement parse_statement(Token *tokens, size_t num_tokens, size_t *skip) {
+    *skip = 0;
     if (!num_tokens) (Statement) {.type=None};
     if (tokens[0].ttype == Varname) {
         return parse_define_assign_statement(tokens, num_tokens);
@@ -78,6 +103,8 @@ Statement parse_statement(Token *tokens, size_t num_tokens) {
         return parse_function_call_statement(tokens, num_tokens);
     } else if (tokens[0].ttype == Return) {
         return parse_return_statement(tokens, num_tokens);
+    } else if (tokens[0].ttype == LBrace) {
+        return parse_scope_statement(tokens, num_tokens, skip);
     } else {
         printf("Unknown statement type (first token type is %s).\n", ttype_as_str(tokens[0].ttype));
         exit(1);
